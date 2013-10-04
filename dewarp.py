@@ -16,17 +16,16 @@ def isInROI(x,y,R1,R2,Cx,Cy):
             isInInner = True
     return isInOuter and not isInInner
 # build the mapping
-def buildMap(Ws,Hs,Wd,Hd,R1,R2,Cx,Cy):
-    map_x = np.zeros((Hd,Wd),np.float32)
-    map_y = np.zeros((Hd,Wd),np.float32)
-    for y in range(0,int(Hd-1)):
-        for x in range(0,int(Wd-1)):
-            r = (float(y)/float(Hd))*(R2-R1)+R1
-            theta = (float(x)/float(Wd))*2.0*np.pi
-            xS = Cx+r*np.sin(theta)
-            yS = Cy+r*np.cos(theta)
-            map_x.itemset((y,x),int(xS))
-            map_y.itemset((y,x),int(yS))
+def buildMap(self, Ws, Hs, Wd, Hd, R1, R2, Cx, Cy, angle):
+    map_x = np.zeros((Hd, Wd), np.float32)
+    map_y = np.zeros((Hd, Wd), np.float32)
+    rMap = np.linspace(R1, R1 + (R2 - R1), Hd)
+    thetaMap = np.linspace(angle, angle + float(Wd) * 2.0 * np.pi, Wd)
+    sinMap = np.sin(thetaMap)
+    cosMap = np.cos(thetaMap)
+    for y in xrange(0, Hd):
+        map_x[y] = Cx + rMap[y] * sinMap
+        map_y[y] = Cy + rMap[y] * cosMap
         
     return map_x, map_y
 # do the unwarping 
@@ -75,7 +74,7 @@ Ws = img.width
 Hs = img.height
 # build the pixel map, this could be sped up
 print "BUILDING MAP!"
-xmap,ymap = buildMap(Ws,Hs,Wd,Hd,R1,R2,Cx,Cy)
+xmap,ymap = buildMap(Ws,Hs,Wd,Hd,R1,R2,Cx,Cy,0)
 print "MAP DONE!"
 # do an unwarping and show it to us
 result = unwarp(img,xmap,ymap)
